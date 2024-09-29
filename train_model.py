@@ -1,58 +1,58 @@
 import pandas as pd
-import mysql.connector
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
-import joblib
+from sklearn.metrics import classification_report
+import mysql.connector
 
-# Connect to MySQL database
-db_connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="123456789",
-    database="voteinfo"
-)
+# MySQL database configuration
+db_config = {
+    'user': 'root',
+    'password': '123456789',  # replace with your MySQL password
+    'host': 'localhost',  # or your MySQL server address
+    'database': 'voteinfo'
+}
 
-# List of tables to fetch data from
-tables = ['voterchanges2023', 'voterchanges2018','voterchanges2018','voterchanges2013','voterchanges2008','voterchanges2003']  # Add more tables as needed
+tables = ['voterchanges2023', 'voterchanges2018', 'voterchanges2013', 'voterchanges2008', 'voterchanges2003']
 
-# Fetch data from each table and combine into a single DataFrame
-data_frames = []
-for table in tables:
-    query = f"SELECT NewlyAddedVoters, DeletedVoters FROM {table}"
-    df = pd.read_sql(query, db_connection)
-    data_frames.append(df)
+def get_data_from_db():
+    # Establish the connection
+    conn = mysql.connector.connect(**db_config)
+    all_data = []
 
-# Combine all data frames
-data = pd.concat(data_frames, ignore_index=True)
+    for table in tables:
+        query = f"SELECT BoothID, NewlyAddedVoters, DeletedVoters FROM {table}"
+        table_data = pd.read_sql(query, conn)
+        all_data.append(table_data)
 
-# Close the database connection
-db_connection.close()
+    conn.close()
 
-# Assuming you have a separate table for results
-results_query = "SELECT Year, Result FROM results_table"
-results_data = pd.read_sql(results_query, db_connection)
+    # Concatenate all the data into a single DataFrame
+    combined_data = pd.concat(all_data, ignore_index=True)
+    return combined_data
 
-# Merge the election data with results
-data = pd.merge(data, results_data, on='Year')
+# Load your historical election data from MySQL
+data = get_data_from_db()
 
-# Feature selection
-features = ['NewlyAddedVoters', 'DeletedVoters', 'Year']
-X = data[features]
-y = data['Result']  # Assuming 'Result' is the target variable
+# Preprocess data
+data['NetChange'] = data['NewlyAddedVoters'] - data['DeletedVoters']
+
+# For demonstration, create a mock target variable 'ElectionOutcome'
+# This should be replaced with actual outcomes based on your data
+data['ElectionOutcome'] = (data['NewlyAddedVoters'] > data['DeletedVoters']).astype(int)  # Example outcome
+
+# Define features and target
+X = data[['BoothID', 'NewlyAddedVoters', 'DeletedVoters', 'NetChange']]
+y = data['ElectionOutcome']  # This should represent the outcome you're predicting
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Initialize and train the model
+# Train the Random Forest model
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-# Save the model
-joblib.dump(model, 'random_forest_model.pkl')
+# Make predictions
+y_pred = model.predict(X_test)
 
 # Evaluate the model
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Accuracy: {accuracy}')
 print(classification_report(y_test, y_pred))
