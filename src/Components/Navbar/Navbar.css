@@ -1,0 +1,213 @@
+.navbar{
+    display: flex;
+    justify-content: space-around;
+    padding: 16px;
+    background: #f37b57;
+    height: 8vh;
+}
+.nav-logo{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.nav-logo p{
+    color: #171717;
+    font-size: 38px;
+    font-weight: 600;
+
+}
+.nav-logo img{
+    height: 80px;
+}
+.nav-login-cart{
+    display: flex;
+    align-items: center;
+    gap: 45px;
+}
+.nav-login-cart button{
+    width: 150px;
+    height: 57px;
+    outline: none;
+    border: 1px solid #7a7a7a;
+    border-radius: 75px;
+    color: #515151;
+    font-size: 20px;
+    font-weight: 500;
+    background: white;
+    cursor: pointer;
+}
+.nav-login-cart button:active{
+    background: #f3f3f3;
+
+}
+
+/* // import React, { useState } from 'react';
+// import Plot from 'react-plotly.js';
+
+// const AnalysisPage = () => {
+//     const [boothID, setBoothID] = useState('');
+//     const [data, setData] = useState([]);
+//     const [loading, setLoading] = useState(false);
+//     const [error, setError] = useState(null);
+
+//     const fetchData = async () => {
+//         setLoading(true);
+//         setError(null);
+//         try {
+//             const responses = await Promise.all([
+//                 fetch(`/api/boothvotes2023/${boothID}`),
+//                 fetch(`/api/boothvotes2018/${boothID}`),
+//                 fetch(`/api/boothvotes2013/${boothID}`),
+//                 fetch(`/api/boothvotes2008/${boothID}`),
+//                 fetch(`/api/boothvotes2003/${boothID}`),
+//             ]);
+           
+
+//           //  const results = await Promise.all(responses.map(res => res.json()));
+//             const results = await Promise.all(responses.map(async (res) => {
+//                 if (!res.ok) {
+//                     console.error('Error fetching data from:', res.url, 'Status:', res.status);
+//                     return null; // Handle unsuccessful fetch
+//                 }
+//                 return await res.json();
+//             }));
+//             console.log('Fetched results:', results);
+//             setData(results.filter(vote => vote)); // Filter out any null votes
+//         } catch (err) {
+//             setError('Failed to fetch data. Please try again.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const handleSubmit = (e) => {
+//         e.preventDefault();
+//         fetchData();
+//     };
+
+//     return (
+//         <div>
+//             <h1>Booth Voting Analysis</h1>
+//             <form onSubmit={handleSubmit}>
+//                 <input
+//                     type="text"
+//                     value={boothID}
+//                     onChange={(e) => setBoothID(e.target.value)}
+//                     placeholder="Enter Booth ID"
+//                     required
+//                 />
+//                 <button type="submit">Fetch Data</button>
+//             </form>
+
+//             {loading && <p>Loading...</p>}
+//             {error && <p>{error}</p>}
+
+//             {data.length > 0 && (
+//                 <div>
+//                     <h2>Results for Booth ID: {boothID}</h2>
+//                     <Plot
+//                         data={[
+//                             {
+//                                 x: data.map((d, index) => `Election ${2023 - index * 5}`),
+//                                 y: data.map(d => d.Votes || 0), // Adjust according to your API response structure
+//                                 type: 'bar',
+//                                 name: 'Votes',
+//                                 marker: { color: 'blue' },
+//                             },
+//                         ]}
+//                         layout={{ title: 'Votes by Year', xaxis: { title: 'Election Year' }, yaxis: { title: 'Number of Votes' } }}
+//                     />
+//                 </div>
+//             )}
+//         </div>
+//     );
+// };
+
+// export default AnalysisPage;
+import React, { useState } from 'react';
+import Plot from 'react-plotly.js';
+
+const AnalysisPage = () => {
+    const [boothID, setBoothID] = useState('');
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const responses = await Promise.all([
+                fetch(`/api/boothvotes2023/${boothID}`),
+                fetch(`/api/boothvotes2018/${boothID}`),
+                fetch(`/api/boothvotes2013/${boothID}`),
+                fetch(`/api/boothvotes2008/${boothID}`),
+                fetch(`/api/boothvotes2003/${boothID}`),
+            ]);
+
+            const results = await Promise.all(responses.map(async (res) => {
+                if (!res.ok) {
+                    console.error('Error fetching data from:', res.url, 'Status:', res.status);
+                    return null;
+                }
+                const data = await res.json();
+                console.log('Fetched data:', data); // Log the individual fetched data
+                return data;
+            }));
+
+            console.log('Fetched results:', results); // Log the aggregated results
+            setData(results.filter(vote => vote)); // Filter out any null votes
+        } catch (err) {
+            setError('Failed to fetch data. Please try again.');
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        fetchData();
+    };
+
+    return (
+        <div>
+            <h1>Booth Voting Analysis</h1>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={boothID}
+                    onChange={(e) => setBoothID(e.target.value)}
+                    placeholder="Enter Booth ID"
+                    required
+                />
+                <button type="submit">Fetch Data</button>
+            </form>
+
+            {loading && <p>Loading...</p>}
+            {error && <p>{error}</p>}
+
+            {data.length > 0 && (
+                <div>
+                    <h2>Results for Booth ID: {boothID}</h2>
+                    <Plot
+                        data={[{
+                            x: ['2023', '2018', '2013', '2008', '2003'], // Years
+                            y: data.map(d => d ? d.Votes || 0 : 0), // Adjust according to your API response structure
+                            type: 'bar',
+                            name: 'Votes',
+                            marker: { color: 'blue' },
+                        }]}
+                        layout={{
+                            title: 'Votes by Year',
+                            xaxis: { title: 'Election Year' },
+                            yaxis: { title: 'Number of Votes' },
+                        }}
+                    />
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default AnalysisPage; */
