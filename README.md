@@ -1,11 +1,11 @@
 # About the Project
 
 
-The project aims to analyze voter data across mul ple elec ons, focusing on the addi on 
-and dele on of voters in the 2023 Madhya Pradesh Assembly Elec on. By using sta s cal 
-techniques, the system will offer insights into how voter base changes affected elec on 
-outcomes at the booth level. The system will provide visualiza ons and reports, helping 
-poli cal analysts understand elec on dynamics and voter behavior trends.
+The project aims to analyze voter data across multiple elections, focusing on the addion 
+and deletion of voters in the 2023 Madhya Pradesh Assembly Election. By using statistical 
+techniques, the system will offer insights into how voter base changes affected election 
+outcomes at the booth level. The system will provide visualizations and reports, helping 
+political analysts understand election dynamics and voter behavior trends.
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
